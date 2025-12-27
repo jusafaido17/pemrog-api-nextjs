@@ -10,7 +10,7 @@ export async function middleware(request) {
   }
 
   // 1. Ambil token dari Header
-  const authHeader = request.headers.get("Authorization");
+  const authHeader = request.headers.get("authorization");
   
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return NextResponse.json(
@@ -43,7 +43,7 @@ export const config = {
   // Tentukan route mana yang difilter middleware ini
   // Contoh: Semua route di dalam /api/products dan /api/users
   matcher: [
-    "/api/products/:path*", 
+    "/api/books/:path*", 
     "/api/users/:path*"
   ],
 };

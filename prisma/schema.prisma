@@ -22,27 +22,39 @@ model User {
   name      String
   email     String   @unique
   password  String
+  role      String   @default("User") // (Admin/User)
+  createdAt DateTime @default(now())
+  
+  books     Book[]   // Relasi: Satu user bisa punya banyak buku
+}
+
+model Book {
+  id        Int      @id @default(autoincrement())
+  title     String
+  author    String
+  year      Int
+  userId    Int?     // Foreign Key ke User
+  user      User?    @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
 }
 
-model Category{
-  id        Int       @id @default(autoincrement())
-  name      String
+// model Category{
+//   id        Int       @id @default(autoincrement())
+//   name      String
 
   // Field Relasi (virtual)
-  product Product[]
-}
+//   product Product[]
+// }
 
-model Product{
-  id        Int       @id @default(autoincrement())
-  name      String
-  price     Int
-  stock     Int
-  createdAt DateTime  @default(now())
+// model Product{
+//   id        Int       @id @default(autoincrement())
+//   name      String
+//   price     Int
+//   stock     Int
+//   createdAt DateTime  @default(now())
 
   // Foreign key (kolom dari id Kategory)
-  categoryId Int?
+  // categoryId Int?
 
   //definisi relasi (prisma level)
-  category Category? @relation(fields: [categoryId], references: [id])
-}
+//   
