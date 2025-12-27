@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 
 export async function POST(request) {
   try {
-    const { name, email, password } = await request.json();
+    const { name, email, password, role } = await request.json();
 
     // 1. Hash Password
     // Angka 10 adalah salt rounds (standar keamanan saat ini)
@@ -16,6 +16,7 @@ export async function POST(request) {
         name,
         email,
         password: hashedPassword, // Simpan yang sudah di-hash!
+        role: role || "User",
       },
     });
 
