@@ -18,7 +18,7 @@ export async function POST(request) {
         title,
         author,
         year: parseInt(year),
-        userId: userId ? parseInt(userId) : null,
+        userId: decoded.id, // Ambil ID langsung dari hasil decode token
       },
     });
 

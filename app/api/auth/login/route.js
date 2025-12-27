@@ -22,7 +22,7 @@ export async function POST(request) {
 
     // 3. Buat Token (Payload: id, email)
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    const token = await new SignJWT({ id: user.id, email: user.email })
+    const token = await new SignJWT({ id: user.id, email: user.email, role: user.role })
       .setProtectedHeader({ alg: "HS256" })
       .setExpirationTime("2h") // Token berlaku 2 jam
       .sign(secret);
