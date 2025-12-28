@@ -10,14 +10,13 @@ export async function middleware(request) {
   }
 
   // 1. Ambil token dari Header
-  const authHeader = request.headers.get("authorization");
-  
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return NextResponse.json(
-        { message: "Unauthorized: Token missing" }, 
-        { status: 401 }
-    );
-  }
+  return NextResponse.json({
+    success: false,
+    error: "Unauthorized: Token Missing",
+    code: 401
+  }, { status: 401 });
+}
 
   const token = authHeader.split(" ")[1]; // Ambil string setelah "Bearer"
 
@@ -32,16 +31,16 @@ export async function middleware(request) {
   } catch (error) {
     // 4. Jika token salah/expired
     console.error("Token salah/expired", error);
-    return NextResponse.json(
-        { message: "Unauthorized: Invalid token" }, 
-        { status: 401 }
-    );
+  return NextResponse.json({
+    success: false,
+    error: "Unauthorized: Invalid Token",
+    code: 401
+  }, { status: 401 });
   }
 }
 
 export const config = {
   // Tentukan route mana yang difilter middleware ini
-  // Contoh: Semua route di dalam /api/products dan /api/users
   matcher: [
     "/api/books/:path*", 
     "/api/users/:path*"
