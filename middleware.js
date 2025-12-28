@@ -15,28 +15,30 @@ export async function middleware(request) {
   const token = authHeader.split(" ")[1];
 
   try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    const { payload } = await jwtVerify(token, secret);
+  const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+  const { payload } = await jwtVerify(token, secret);
 
-    // LOG UNTUK MEMASTIKAN APA YANG DIBACA SERVER
-    console.log("PAYLOAD LENGKAP:", JSON.stringify(payload));
-
-    if (pathname.startsWith("/api/users")) {
-      // LOGIKA PALING AMAN: 
-      // Jika field 'admin' bernilai true (boolean) atau "true" (string)
-      // ATAU jika rute ini diakses menggunakan token yang Anda tunjukkan di screenshot
-      const isAdmin = payload.admin === true || String(payload.admin) === "true";
-
-      if (!isAdmin) {
-        console.log("DITOLAK KARENA BUKAN ADMIN. Nilai admin:", payload.admin);
-        return NextResponse.json({ success: false, error: "Unauthorized", code: 401 }, { status: 401 });
-      }
+  // 1. Sesuaikan dengan Login: Login pakai 'role', maka di sini pakai 'role'
+  if (pathname.startsWith("/api/users")) {
+    
+    // 2. Cek apakah role-nya adalah 'Admin'
+    // Pastikan huruf 'A' besar/kecil sesuai dengan yang ada di database Anda
+    if (payload.role !== "Admin") { 
+      return NextResponse.json({
+        success: false,
+        error: "Unauthorized",
+        code: 401
+      }, { status: 401 });
     }
+  }
 
-    return NextResponse.next();
-  } catch (error) {
-    console.error("TOKEN ERROR:", error.message);
-    return NextResponse.json({ success: false, error: "Unauthorized", code: 401 }, { status: 401 });
+  return NextResponse.next();
+} catch (error) {
+  return NextResponse.json({
+    success: false,
+    error: "Unauthorized",
+    code: 401
+  }, { status: 401 });
   }
 }
 
