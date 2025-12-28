@@ -3,46 +3,64 @@ import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
 export async function middleware(request) {
-  //tambahkan ini sementara untuk bypass middleware di pertemuan 08. CRUD API Lanjutan
+  const { pathname } = request.nextUrl;
+
+  // 1. BYPASS CHECK (Hapus atau set ke false di .env saat UAS)
   if (process.env.DISABLE_AUTH_MIDDLEWARE === "true") {
-    console.log("Middleware dinonaktifkan sementara");
     return NextResponse.next();
   }
 
+  // 2. PUBLIC ROUTE: Izinkan akses ke /api/auth/ tanpa token
+  if (pathname.startsWith("/api/auth/")) {
+    return NextResponse.next();
+  }
+
+  // 3. AMBIL TOKEN DARI HEADER
   const authHeader = request.headers.get("authorization");
-
-  // 1. Ambil token dari Header
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-  return NextResponse.json({
-    success: false,
-    error: "Unauthorized: Token Missing",
-    code: 401
-  }, { status: 401 });
-}
+    return NextResponse.json({
+      success: false,
+      error: "Unauthorized",
+      code: 401
+    }, { status: 401 });
+  }
 
-  const token = authHeader.split(" ")[1]; // Ambil string setelah "Bearer"
+  const token = authHeader.split(" ")[1];
 
   try {
-    // 2. Verifikasi Token
+    // 4. VERIFIKASI TOKEN
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    await jwtVerify(token, secret);
+    const { payload } = await jwtVerify(token, secret);
 
-    // 3. Jika sukses, lanjut
+    // 5. ROLE BASED ACCESS (Instruksi Poin 3)
+    
+    // Rute /api/users/ HANYA untuk Admin
+    if (pathname.startsWith("/api/users")) {
+      if (payload.admin !== "true") {
+        return NextResponse.json({
+          success: false,
+          error: "Unauthorized",
+          code: 401
+        }, { status: 401 });
+      }
+    }
+
+    // Rute /api/books/ (Items) sudah terproteksi karena butuh token valid di atas
+    
     return NextResponse.next();
 
   } catch (error) {
-    // 4. Jika token salah/expired
-    console.error("Token salah/expired", error);
-  return NextResponse.json({
-    success: false,
-    error: "Unauthorized: Invalid Token",
-    code: 401
-  }, { status: 401 });
+    console.error("Auth Error:", error.message);
+    return NextResponse.json({
+      success: false,
+      error: "Unauthorized",
+      code: 401
+    }, { status: 401 });
   }
 }
 
+// 6. MATCHER: Mengatur rute mana saja yang melewati middleware ini
 export const config = {
-  // Tentukan route mana yang difilter middleware ini
   matcher: [
     "/api/books/:path*", 
     "/api/users/:path*"
