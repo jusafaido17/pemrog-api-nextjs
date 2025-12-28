@@ -9,6 +9,8 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
+  const authHeader = request.headers.get("authorization");
+
   // 1. Ambil token dari Header
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
   return NextResponse.json({
