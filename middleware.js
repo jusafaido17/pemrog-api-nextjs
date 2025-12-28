@@ -36,7 +36,7 @@ export async function middleware(request) {
     
     // Rute /api/users/ HANYA untuk Admin
     if (pathname.startsWith("/api/users")) {
-      if (payload.admin !== "true") {
+      if (payload.admin !== true) {
         return NextResponse.json({
           success: false,
           error: "Unauthorized",
