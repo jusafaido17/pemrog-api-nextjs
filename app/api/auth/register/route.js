@@ -7,7 +7,6 @@ export async function POST(request) {
     const { name, email, password, role } = await request.json();
 
     // 1. Hash Password
-    // Angka 10 adalah salt rounds (standar keamanan saat ini)
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // 2. Simpan ke DB
@@ -15,14 +14,26 @@ export async function POST(request) {
       data: {
         name,
         email,
-        password: hashedPassword, // Simpan yang sudah di-hash!
+        password: hashedPassword,
         role: role || "User",
       },
     });
 
-    return NextResponse.json({ message: "User created" }, { status: 201 });
+    // --- RESPONSE SUKSES SESUAI KETENTUAN ---
+    return NextResponse.json({
+      success: true,
+      message: "User berhasil didaftarkan",
+      data: newUser
+    }, { status: 201 });
+
   } catch (error) {
-    console.error("Error GET User: ", error);
-    return NextResponse.json({ message: "Error" }, { status: 500 });
+    console.error("Error Register: ", error);
+    
+    // --- RESPONSE ERROR SESUAI KETENTUAN ---
+    return NextResponse.json({
+      success: false,
+      error: "Unauthorized",
+      code: 401
+    }, { status: 401 });
   }
 }

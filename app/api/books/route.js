@@ -1,28 +1,44 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken"; // 1. Wajib Import ini
+import jwt from "jsonwebtoken";
 
-// Ambil semua buku dari Neon DB
+// GET: Ambil semua buku dari Neon DB
 export async function GET() {
-  const books = await prisma.book.findMany();
-  return NextResponse.json(books);
+  try {
+    const books = await prisma.book.findMany();
+    
+    return NextResponse.json({
+      success: true,
+      message: "Data buku berhasil diambil",
+      data: books
+    }, { status: 200 }); // Status 200 untuk pengambilan data
+  } catch (error) {
+    return NextResponse.json({
+      success: false,
+      error: "Unauthorized",
+      code: 401
+    }, { status: 401 }); // Error diseragamkan ke 401 sesuai ketentuan
+  }
 }
 
-// Tambah buku ke Neon DB
+// POST: Tambah buku ke Neon DB
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { title, author, year } = body; // userId tidak perlu diambil dari body lagi
+    const { title, author, year } = body;
 
-    // Ambil token dari Header Authorization
     const authHeader = request.headers.get("authorization");
     if (!authHeader) {
-      return NextResponse.json({ error: "Missing token" }, { status: 401 });
+      return NextResponse.json({ 
+        success: false, 
+        error: "Unauthorized", 
+        code: 401 
+      }, { status: 401 });
     }
 
     const token = authHeader.split(" ")[1];
 
-    // Verifikasi token dan definisikan variabel 'decoded'
+    // Verifikasi token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const newBook = await prisma.book.create({
@@ -30,13 +46,22 @@ export async function POST(request) {
         title,
         author,
         year: parseInt(year),
-        userId: decoded.id, 
+        userId: decoded.id, // Menyimpan ID user
       },
     });
 
-    return NextResponse.json(newBook, { status: 201 });
+    return NextResponse.json({
+      success: true,
+      message: "Buku berhasil ditambahkan",
+      data: newBook
+    }, { status: 201 }); // Status 201 karena berhasil membuat data baru
+
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Invalid token or server error" }, { status: 500 });
+    return NextResponse.json({ 
+      success: false, 
+      error: "Unauthorized", 
+      code: 401 
+    }, { status: 401 }); // Error diseragamkan ke 401 sesuai ketentuan
   }
 }

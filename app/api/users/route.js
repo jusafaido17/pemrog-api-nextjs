@@ -11,12 +11,24 @@ const UserSchema = z.object({
 
 // GET: Ambil semua data user
 export async function GET() {
-  try{
+  try {
       const users = await prisma.user.findMany();
-      return NextResponse.json(users);
-  }catch(error){
+      
+      // Response Sukses Sesuai Ketentuan
+      return NextResponse.json({
+        success: true,
+        message: "Data user berhasil diambil",
+        data: users
+      });
+  } catch (error) {
     console.error("Error get Data: ", error);
-    NextResponse.json({message: "Server Error"}, {status: 500});
+    
+    // Response Error Sesuai Ketentuan (401)
+    return NextResponse.json({
+      success: false,
+      error: "Unauthorized",
+      code: 401
+    }, { status: 401 });
   }
 }
 
@@ -35,26 +47,40 @@ export async function GET() {
 // }
 
 //!POST dengan try-catch dilengkapi ZOD
-export async function POST(request){
-  try{
+export async function POST(request) {
+  try {
     const body = await request.json();
     const validation = UserSchema.safeParse(body);
-    if(!validation.success){
+    
+    if (!validation.success) {
+      // Jika validasi gagal, tetap gunakan format Unauthorized 401 sesuai ketentuan
       return NextResponse.json({
-        message: "Input Tidak Valid",
-        error: validation.error.flatten().fieldErrors
-      },
-      {status: 400}
-    );
+        success: false,
+        error: "Unauthorized",
+        code: 401,
+        details: validation.error.flatten().fieldErrors // Opsional: tetap sertakan detail Zod
+      }, { status: 401 });
     }
 
     const newUser = await prisma.user.create({
       data: body
     });
-    return NextResponse.json(newUser, {status: 200});
 
-  }catch(error){
+    // Response Sukses Sesuai Ketentuan
+    return NextResponse.json({
+      success: true,
+      message: "User berhasil ditambahkan",
+      data: newUser
+    }, { status: 200 });
+
+  } catch (error) {
     console.error("Error POST User: ", error);
-    NextResponse.json({message: "Server Error"}, {status: 500});
+    
+    // Response Error Sesuai Ketentuan (401)
+    return NextResponse.json({
+      success: false,
+      error: "Unauthorized",
+      code: 401
+    }, { status: 401 });
   }
 }
