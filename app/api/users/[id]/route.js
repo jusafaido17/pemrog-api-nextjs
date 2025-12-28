@@ -68,131 +68,118 @@ import { NextResponse } from "next/server";
 
 // ======================= dengan try-catch =======================================
 
-export async function GET(request, {params}){
-      try{
-        const resolvedParams = await params;
-        const id = parseInt(resolvedParams.id);
+// GET: Ambil detail satu user berdasarkan ID
+export async function GET(request, { params }) {
+  try {
+    const resolvedParams = await params;
+    const id = parseInt(resolvedParams.id);
 
-        if(isNaN(id)){
-            return NextResponse.json({message: "ID tidak valid"}, {staus:400});
-        }
-
-        const user = await prisma.user.findUnique({
-            where :{id: id}
-        });
-
-        if(!user){
-            return NextResponse.json(
-                {message: "User tidak ditemukan"},
-                {status: 404}
-            );
-        }
-
-        return NextResponse.json(user, {status: 200});
-        
-    }catch(error){
-        console.error("Error GET User: ", error);
-        return NextResponse.json(
-            {message: "Error Server"}, {staus: 500});
+    if (isNaN(id)) {
+      return NextResponse.json({
+        success: false,
+        error: "Unauthorized",
+        code: 401
+      }, { status: 401 });
     }
+
+    const user = await prisma.user.findUnique({
+      where: { id: id }
+    });
+
+    if (!user) {
+      return NextResponse.json({
+        success: false,
+        error: "Unauthorized",
+        code: 401
+      }, { status: 401 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "User berhasil ditemukan",
+      data: user
+    }, { status: 200 });
+
+  } catch (error) {
+    console.error("Error GET User: ", error);
+    return NextResponse.json({
+      success: false,
+      error: "Unauthorized",
+      code: 401
+    }, { status: 401 });
+  }
 }
 
-export async function PUT(request, {params}){
-    try{
-        const resolvedParams = await params;
-        const id = parseInt(resolvedParams.id);
+// PUT: Mengupdate data user
+export async function PUT(request, { params }) {
+  try {
+    const resolvedParams = await params;
+    const id = parseInt(resolvedParams.id);
 
-        if(isNaN(id)){
-            return NextResponse.json(
-                {message: "ID tidak valid"},
-                {status:400}
-            );
-        }
-
-        const existingUser = await prisma.user.findUnique({
-            where:{id: id}
-        });
-
-        if(!existingUser){
-            return NextResponse.json(
-                {message: `User dengan ID ${id} tidak ditemukan`},
-                {status: 404}
-            );
-        }
-
-        const data = await request.json();
-        const updateUser = await prisma.user.update({
-            where :{id: id},
-            data: {
-                name: data.name,
-                email: data.email,
-                password: data.password
-            }
-        });
-
-        return NextResponse.json({
-            message: "User berhasil diupdate", 
-            data: updateUser}, 
-            {status: 200}
-        );
-    }catch(error){
-        console.error("Error PUT User: ", error);
-
-        if(error.code == 'P2025'){
-            return NextResponse.json(
-                {message: "User tidak ditemukan"},
-                {status: 404}
-            );
-        }
-
-        return NextResponse.json(
-            {message: "Terjadi kesalahan pada server"},
-            {status: 500}
-        );
+    if (isNaN(id)) {
+      return NextResponse.json({
+        success: false,
+        error: "Unauthorized",
+        code: 401
+      }, { status: 401 });
     }
+
+    const data = await request.json();
+    const updateUser = await prisma.user.update({
+      where: { id: id },
+      data: {
+        name: data.name,
+        email: data.email,
+        password: data.password
+      }
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "User berhasil diupdate",
+      data: updateUser
+    }, { status: 200 });
+
+  } catch (error) {
+    console.error("Error PUT User: ", error);
+    return NextResponse.json({
+      success: false,
+      error: "Unauthorized",
+      code: 401
+    }, { status: 401 });
+  }
 }
 
-export async function DELETE(request, {params}){
-    try{
-        const resolvedParams = await params;
-        const id = parseInt(resolvedParams.id);
+// DELETE: Menghapus user
+export async function DELETE(request, { params }) {
+  try {
+    const resolvedParams = await params;
+    const id = parseInt(resolvedParams.id);
 
-        if(isNaN(id)){
-            return NextResponse.json(
-                {message: "ID tidak valid"},
-                {status:400}
-            );
-        }
-
-        const existingUser = await prisma.user.findUnique({
-            where: { id },
-        });
-
-        if (!existingUser) {
-            return NextResponse.json(
-                { message: `User dengan ID ${id} tidak ditemukan` },
-                { status: 404 }
-            );
-        }
-
-        const deletedUser = await prisma.user.delete({
-            where: { id },
-        });
-
-        return NextResponse.json(
-            { message: "User berhasil dihapus", data: deletedUser},
-            { status: 200 }
-        );
-
-    }catch(error){
-        console.error("Error DELETE User: ", error);
-
-        return NextResponse.json(
-            {
-                message: "Terjadi kesalahan saat menghapus User",
-                erorr: error.message
-            },
-            {status: 500}
-        );
+    if (isNaN(id)) {
+      return NextResponse.json({
+        success: false,
+        error: "Unauthorized",
+        code: 401
+      }, { status: 401 });
     }
+
+    const deletedUser = await prisma.user.delete({
+      where: { id: id },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "User berhasil dihapus",
+      data: deletedUser
+    }, { status: 200 });
+
+  } catch (error) {
+    console.error("Error DELETE User: ", error);
+    return NextResponse.json({
+      success: false,
+      error: "Unauthorized",
+      code: 401
+    }, { status: 401 });
+  }
 }
