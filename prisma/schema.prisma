@@ -37,24 +37,3 @@ model Book {
   user      User?    @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
 }
-
-// model Category{
-//   id        Int       @id @default(autoincrement())
-//   name      String
-
-  // Field Relasi (virtual)
-//   product Product[]
-// }
-
-// model Product{
-//   id        Int       @id @default(autoincrement())
-//   name      String
-//   price     Int
-//   stock     Int
-//   createdAt DateTime  @default(now())
-
-  // Foreign key (kolom dari id Kategory)
-  // categoryId Int?
-
-  //definisi relasi (prisma level)
-//   
